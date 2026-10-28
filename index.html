@@ -1,8 +1,8 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Tabela de Preços Marquinhos</title>
+<title>Calhas Marquinhos</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: barra de abas fixa + tabelas em blocos; matriz de cortes como peça central */
 :root{
@@ -71,21 +71,56 @@ mark{background:var(--warn-soft);color:inherit}
 .foot{color:var(--muted);font-size:12px}
 @media (max-width:560px){th,td{padding:7px 8px}input.v{width:74px}.brand h1{font-size:26px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Peças 3D */
+:root{--stage:#e7e3df;--dim:#c2410c;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--stage:#1b1917;--dim:#f08a4b}}
+:root[data-theme="dark"]{--stage:#1b1917;--dim:#f08a4b}
+.sw{display:flex;gap:0;border:1px solid rgba(255,255,255,.55);border-radius:6px;overflow:hidden}
+.sw button{border:0;border-radius:0;background:transparent;color:#fff;padding:7px 14px;font-weight:600;font-size:14px}
+.sw button.on{background:#fff;color:#b3181d}
+#tabActions{display:flex;gap:8px;flex-wrap:wrap}
+.p3-wrap{padding-block:20px 48px;display:grid;gap:16px}
+.p3-pieces{display:flex;flex-wrap:wrap;gap:6px}
+.p3-pieces button{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:7px 12px;font-weight:600;font-size:14px}
+.p3-pieces button:hover{border-color:var(--brand)}
+.p3-pieces button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.p3-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}
+@media (max-width:860px){.p3-grid{grid-template-columns:minmax(0,1fr)}}
+.p3-stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:8px;min-height:460px;overflow:hidden}
+#p3c{position:absolute;inset:0;width:100%;height:100%;display:block}
+.p3-views{position:absolute;right:10px;top:10px;display:flex;gap:6px}
+.p3-views .btn{padding:5px 10px;font-size:13px}
+.p3-hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
+.p3-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.p3-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.p3-lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;font-weight:600}
+.p3-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.p3-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.p3-f label{font-size:13px;color:var(--muted)}
+.p3-f input{font:500 15px var(--mono);padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:100%;font-variant-numeric:tabular-nums}
+.p3-tag{font:600 12px var(--mono);color:var(--dim);margin-right:4px}
+.p3-res{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0}
+.p3-res dt{color:var(--muted)}
+.p3-res dd{margin:0;font:600 15px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.p3-res .big{font-size:19px;color:var(--brand)}
+#p3sec text{font-family:var(--mono)}
 </style>
 
 <header class="top"><div class="wrap">
   <div class="brand">
     <small>Calhas e Esquadrias Marquinhos</small>
-    <h1>Tabela de Preços</h1>
+    <h1 id="hTitle">Tabela de Preços</h1>
     <div class="meta">CNPJ 26.887.887/0001-75 · <span id="upd"></span></div>
   </div>
   <div class="actions">
-    <a class="btn" href="/pecas-3d" style="text-decoration:none">Peças 3D</a>
-    <button class="btn" id="bCopy">Copiar p/ WhatsApp</button>
-    <button class="btn" id="bEdit">Editar preços</button>
+    <div class="sw" role="group" aria-label="Seção"><button id="swTab" class="on">Tabela de preços</button><button id="swP3">Peças 3D</button></div>
+    <span id="tabActions"><button class="btn" id="bCopy">Copiar p/ WhatsApp</button>
+    <button class="btn" id="bEdit">Editar preços</button></span>
   </div>
 </div></header>
 
+<div id="vTab">
 <nav class="tabs"><div class="wrap" id="tabs"></div></nav>
 
 <main><div class="wrap">
@@ -116,6 +151,25 @@ mark{background:var(--warn-soft);color:inherit}
   <div id="content" style="display:grid;gap:28px"></div>
   <p class="foot">Edições ficam salvas neste aparelho/navegador.</p>
 </div></main>
+</div>
+<div id="v3d" hidden><div class="wrap p3-wrap">
+  <nav class="p3-pieces" id="p3tabs" aria-label="Peças"></nav>
+  <div class="p3-grid">
+    <div class="p3-stage">
+      <canvas id="p3c"></canvas>
+      <div class="p3-views"><button class="btn" id="p3iso">3D</button><button class="btn" id="p3front">Corte</button></div>
+      <div class="p3-hint">Arrastar: girar · Botão direito: mover · Scroll/pinça: zoom</div>
+    </div>
+    <div class="p3-side">
+      <div class="p3-card"><p class="p3-lbl">Medidas (cm)</p><div class="p3-fields" id="p3fields"></div></div>
+      <div class="p3-card"><p class="p3-lbl">Corte da peça</p><svg id="p3sec" viewBox="0 0 320 210" width="100%" aria-label="Seção transversal com cotas"></svg></div>
+      <div class="p3-card"><p class="p3-lbl">Resultado</p><dl class="p3-res">
+        <dt>Desenvolvimento (corte)</dt><dd class="big" id="p3dev">–</dd>
+        <dt>Área de chapa</dt><dd id="p3area">–</dd>
+        <dt>Dobras</dt><dd id="p3dob">–</dd></dl></div>
+    </div>
+  </div>
+</div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -218,19 +272,20 @@ function render(){
   // Cortes
   const c = data.cortes;
   const crow = c.rows.filter(r=>!q || String(r[0]).includes(q) || "corte".includes(q));
-  if(crow.length){
+  const only=id=>q||active===id;
+  if(crow.length&&only("cortes")){
     h += `<section id="cortes"><h2>Cortes</h2><p class="sub">Valor por metro, conforme largura de corte (mm) e espessura da chapa. 1.0 mm: calculado sobre as bobinas de 1000 e 1200 mm, com parte da sobra inclusa no preço.</p><div class="card"><table><thead><tr><th>Corte</th>${c.esp.map((e,i)=>`<th class="num"><div class="th-esp">Espessura<b>${e} mm</b>${c.novo[i]?'<span class="new">NOVA</span>':""}</div></th>`).join("")}</tr></thead><tbody>`+
       crow.map(r=>{const ri=c.rows.indexOf(r);return `<tr><td class="corte">${r[0]} <span>mm</span></td>${r.slice(1).map((v,ci)=>cell(v,`c-${ri}-${ci+1}`,"")).join("")}</tr>`}).join("")+
       `</tbody></table></div></section>`;
   }
   data.tables.forEach((t,ti)=>{
     const rows = t.rows.map((r,ri)=>[r,ri]).filter(([r])=>!q||norm(r[0]).includes(q)||norm(t.title).includes(q));
-    if(!rows.length) return;
+    if(!rows.length||!only(t.id)) return;
     h += `<section id="${t.id}"><h2>${esc(t.title)}</h2>${t.sub?`<p class="sub">${esc(t.sub)}</p>`:""}<div class="card"><table><thead><tr><th>Item</th>${t.cols.map(x=>`<th class="num">${esc(x)}</th>`).join("")}</tr></thead><tbody>`+
       rows.map(([r,ri])=>`<tr><td class="lbl">${hl(r[0],q)}</td>${r[1].map((v,ci)=>cell(v,`t-${ti}-${ri}-${ci}`,r[2]||t.unit)).join("")}</tr>`).join("")+
       `</tbody></table></div></section>`;
   });
-  if(!q) h += `<section id="cond"><h2>Condições</h2><div class="notes">${NOTES.map(n=>`<div class="note"><b>${n[0]}</b><span>${n[1]}</span></div>`).join("")}</div></section>`;
+  if(!q&&active==="cond") h += `<section id="cond"><h2>Condições</h2><div class="notes">${NOTES.map(n=>`<div class="note"><b>${n[0]}</b><span>${n[1]}</span></div>`).join("")}</div></section>`;
   if(!h) h = `<p class="sub">Nenhum item encontrado para essa busca.</p>`;
   document.getElementById("content").innerHTML = h;
 }
@@ -266,7 +321,7 @@ document.getElementById("bCalc").onclick=()=>{
   if(!(kg>0)||isNaN(mg)||isNaN(sb)){toast("Preencha R$/kg, margem e % da sobra");return}
   data.calc1={kg,margem:mg,sobra:sb};data.cortes.rows.forEach(r=>r[4]=preco1mm(r[0],kg,mg,sb));save();render();toast("Coluna 1.0 mm recalculada");
 };
-document.getElementById("tabs").addEventListener("click",e=>{const id=e.target.dataset.id;if(id){active=id;document.querySelectorAll("#tabs a").forEach(a=>a.classList.toggle("active",a.dataset.id===id))}});
+document.getElementById("tabs").addEventListener("click",e=>{const a=e.target.closest("a[data-id]");if(!a)return;e.preventDefault();active=a.dataset.id;const qi=document.getElementById("q");if(qi.value){qi.value=""}render();window.scrollTo({top:0})});
 
 function asText(){
   const f=v=>v==null?"a definir":brl(v);
@@ -283,6 +338,396 @@ document.getElementById("bCopy").onclick=()=>{
 };
 let tt;function toast(m){const el=document.getElementById("toast");el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,1600)}
 render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt=(v,d=1)=>v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const rad=d=>d*Math.PI/180;
+const GAP=0.4;
+const PIECES={
+  "platibanda":{
+    nome:"Calha platibanda",
+    campos:[["A","Lado parede",20],["B","Fundo",25],["C","Lado frente",10],["D","Aba",5],["E","Bainha topo",1.5]],
+    perfil(v){
+      const pts=[],segs=[];
+      if(v.E>0){pts.push([v.E*Math.sin(rad(20)),v.A-v.E*Math.cos(rad(20))]);segs.push(["E",v.E,[0.6,-0.8]])}
+      pts.push([0,v.A]);segs.push(["A",v.A,[-1,0]]);
+      pts.push([0,0]);segs.push(["B",v.B,[0,1]]);
+      pts.push([v.B,0]);segs.push(["C",v.C,[1,0]]);
+      pts.push([v.B,v.C]);
+      if(v.D>0){segs.push(["D",v.D,[0,-1]]);pts.push([v.B+v.D,v.C])}
+      const dob=segs.filter(s=>s[1]>0).length-1;
+      return {pts,segs,dob};
+    }
+  },
+  "agua-furtada":{
+    nome:"Água furtada",
+    campos:[["A","Aba esquerda",25],["B","Aba direita",25],["E","Bainha (fechada)",1],["ang","Inclinação abas (°)",30]],
+    perfil(v){
+      const a=rad(Math.min(v.ang,89));
+      const uL=[-Math.cos(a),Math.sin(a)], uR=[Math.cos(a),Math.sin(a)];
+      const nL=[Math.sin(a),Math.cos(a)], nR=[-Math.sin(a),Math.cos(a)]; // lado de cima
+      const TL=[uL[0]*v.A,uL[1]*v.A], TR=[uR[0]*v.B,uR[1]*v.B];
+      const add=(p,u,k)=>[p[0]+u[0]*k,p[1]+u[1]*k];
+      const pts=[],segs=[];
+      if(v.E>0){
+        pts.push(add(add(TL,nL,GAP),uL,-v.E)); segs.push(["E",v.E,[0.3,-1]]);
+        pts.push(add(TL,nL,GAP)); segs.push([null,0]);
+      }
+      pts.push(TL); segs.push(["A",v.A,[-0.6,0.8]]);
+      pts.push([0,0]); segs.push(["B",v.B,[0.6,0.8]]);
+      pts.push(TR);
+      if(v.E>0){
+        segs.push([null,0]); pts.push(add(TR,nR,GAP));
+        segs.push(["E",v.E,[-0.3,-1]]); pts.push(add(add(TR,nR,GAP),uR,-v.E));
+      }
+      return {pts,segs,dob:1+(v.E>0?2:0),ang:v.ang};
+    }
+  },
+  "coletora":{
+    nome:"Calha coletora / condutora",
+    campos:[["A","Lado esquerdo",10],["B","Fundo",15],["C","Lado direito",10],["E","Bainha topo (cada)",1.5]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),pts=[],segs=[];
+      if(v.E>0){pts.push([v.E*s,v.A-v.E*c]);segs.push(["E",v.E,[0.6,-0.8]])}
+      pts.push([0,v.A]);segs.push(["A",v.A,[-1,0]]);
+      pts.push([0,0]);segs.push(["B",v.B,[0,1]]);
+      pts.push([v.B,0]);segs.push(["C",v.C,[1,0]]);
+      pts.push([v.B,v.C]);
+      if(v.E>0){segs.push(["E",v.E,[-0.6,-0.8]]);pts.push([v.B-v.E*s,v.C-v.E*c])}
+      return {pts,segs,dob:2+(v.E>0?2:0)};
+    }
+  },
+  "rufo-condutor":{
+    nome:"Rufo condutor",
+    campos:[["A","Lado parede",15],["B","Fundo",20],["C","Lado frente",5],["E","Bainha topo",1.5]],
+    perfil(v){
+      const pts=[],segs=[];
+      if(v.E>0){pts.push([v.E*Math.sin(rad(20)),v.A-v.E*Math.cos(rad(20))]);segs.push(["E",v.E,[0.6,-0.8]])}
+      pts.push([0,v.A]);segs.push(["A",v.A,[-1,0]]);
+      pts.push([0,0]);segs.push(["B",v.B,[0,1]]);
+      pts.push([v.B,0]);segs.push(["C",v.C,[1,0]]);
+      pts.push([v.B,v.C]);
+      return {pts,segs,dob:2+(v.E>0?1:0)};
+    }
+  },
+  "rufo-acabamento":{
+    nome:"Rufo acabamento de telha",
+    campos:[["A","Topo",15],["B","Lateral",15],["C","Base",12],["D","Aba frente",5],["E","Dobra final",1.5]],
+    perfil(v){
+      const pts=[],segs=[],H=v.B;
+      if(v.D>0){pts.push([v.A+v.D*Math.sin(rad(15)),H-v.D*Math.cos(rad(15))]);segs.push(["D",v.D,[1,0]])}
+      pts.push([v.A,H]);segs.push(["A",v.A,[0,-1]]);
+      pts.push([0,H]);segs.push(["B",v.B,[-1,0]]);
+      pts.push([0,0]);segs.push(["C",v.C,[0,1]]);
+      pts.push([v.C,0]);
+      if(v.E>0){segs.push(["E",v.E,[0.8,0.6]]);pts.push([v.C+v.E*Math.cos(rad(35)),v.E*Math.sin(rad(35))])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "rufo-convencional":{
+    nome:"Rufo convencional",
+    campos:[["A","Aba parede",8],["B","Capa (inclinada)",20],["C","Aba frente",8],["E","Bainha topo",1.5],["ang","Caimento capa (°)",10]],
+    perfil(v){
+      const a=rad(Math.min(v.ang,60)),pts=[],segs=[];
+      if(v.E>0){pts.push([v.E*Math.sin(rad(20)),v.A-v.E*Math.cos(rad(20))]);segs.push(["E",v.E,[0.6,-0.8]])}
+      pts.push([0,v.A]);segs.push(["A",v.A,[-1,0]]);
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      const P=[v.B*Math.cos(a),-v.B*Math.sin(a)];pts.push(P);
+      if(v.C>0){segs.push(["C",v.C,[1,0]]);pts.push([P[0],P[1]-v.C])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "rufo-testeira":{
+    nome:"Rufo testeira",
+    campos:[["A","Aba traseira",5],["B","Topo",15],["C","Testeira",20],["D","Base",10],["E","Pingadeira",4],["F","Bainha",1.5]],
+    perfil(v){
+      const pts=[],segs=[],H=v.C,x=v.B+v.D;
+      if(v.A>0){pts.push([0,H-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,H]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,H]);segs.push(["C",v.C,[1,0]]);
+      pts.push([v.B,0]);segs.push(["D",v.D,[0,-1]]);
+      pts.push([x,0]);
+      if(v.E>0){segs.push(["E",v.E,[1,0]]);pts.push([x,-v.E])}
+      if(v.E>0&&v.F>0){segs.push(["F",v.F,[-0.8,0.6]]);pts.push([x-v.F*Math.sin(rad(20)),-v.E+v.F*Math.cos(rad(20))])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "cumeeira":{
+    nome:"Rufo de cumeeira",
+    campos:[["A","Aba esquerda",5],["B","Água esquerda",20],["C","Água direita",20],["D","Aba direita",5],["ang","Inclinação águas (°)",25]],
+    perfil(v){
+      const a=rad(Math.min(v.ang,80)),c=Math.cos(a),s=Math.sin(a),pts=[],segs=[];
+      const L=[-v.B*c,-v.B*s],R=[v.C*c,-v.C*s];
+      if(v.A>0){pts.push([L[0],L[1]-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push(L);segs.push(["B",v.B,[-0.5,-0.9]]);
+      pts.push([0,0]);segs.push(["C",v.C,[0.5,-0.9]]);
+      pts.push(R);
+      if(v.D>0){segs.push(["D",v.D,[1,0]]);pts.push([R[0],R[1]-v.D])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1,ang:v.ang};
+    }
+  },
+  "pingadeira-rufo":{
+    nome:"Pingadeira com rufo (degrau)",
+    campos:[["A","Pingadeira",5],["B","Topo",20],["C","Degrau",8],["D","Rufo (inclinado)",12],["E","Aba frente",8],["F","Bainha pingadeira",1.5],["ang","Caimento rufo (°)",10]],
+    perfil(v){
+      const a=rad(Math.min(v.ang,60)),pts=[],segs=[];
+      if(v.A>0&&v.F>0){pts.push([v.F*Math.sin(rad(20)),-v.A+v.F*Math.cos(rad(20))]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,0]);segs.push(["C",v.C,[1,0]]);
+      pts.push([v.B,-v.C]);segs.push(["D",v.D,[0.2,-1]]);
+      const P=[v.B+v.D*Math.cos(a),-v.C-v.D*Math.sin(a)];pts.push(P);
+      if(v.E>0){segs.push(["E",v.E,[1,0]]);pts.push([P[0],P[1]-v.E])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "rufo-chapeu":{
+    nome:"Rufo chapéu",
+    campos:[["A","Aba esquerda",12],["B","Topo",20],["C","Lateral esquerda",10],["D","Lateral direita",10],["E","Aba direita",12],["ang","Caimento abas (°)",30]],
+    perfil(v){
+      const a=rad(Math.min(v.ang,80)),c=Math.cos(a),s=Math.sin(a),pts=[],segs=[];
+      const yR=v.C-v.D;
+      if(v.A>0){pts.push([-v.A*c,-v.A*s]);segs.push(["A",v.A,[-0.5,-0.9]])}
+      pts.push([0,0]);segs.push(["C",v.C,[-1,0]]);
+      pts.push([0,v.C]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,v.C]);segs.push(["D",v.D,[1,0]]);
+      pts.push([v.B,yR]);
+      if(v.E>0){segs.push(["E",v.E,[0.5,-0.9]]);pts.push([v.B+v.E*c,yR-v.E*s])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "calha-central":{
+    nome:"Calha central (fundo reto)",
+    campos:[["A","Aba esquerda",8],["B","Lateral esquerda",12],["C","Fundo",25],["D","Lateral direita",12],["E","Aba direita",8]],
+    perfil(v){
+      const pts=[],segs=[];
+      if(v.A>0){pts.push([-v.A,v.B]);segs.push(["A",v.A,[0,-1]])}
+      pts.push([0,v.B]);segs.push(["B",v.B,[-1,0]]);
+      pts.push([0,0]);segs.push(["C",v.C,[0,1]]);
+      pts.push([v.C,0]);segs.push(["D",v.D,[1,0]]);
+      pts.push([v.C,v.D]);
+      if(v.E>0){segs.push(["E",v.E,[0,-1]]);pts.push([v.C+v.E,v.D])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "pingadeira":{
+    nome:"Pingadeira",
+    campos:[["A","Aba esquerda",4],["B","Topo (largura muro)",20],["C","Aba direita",4],["F","Bainha (cada)",1.5]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),pts=[],segs=[];
+      if(v.A>0&&v.F>0){pts.push([v.F*s,-v.A+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,0]);
+      if(v.C>0){segs.push(["C",v.C,[1,0]]);pts.push([v.B,-v.C])}
+      if(v.C>0&&v.F>0){segs.push(["F",v.F,[-0.8,0.6]]);pts.push([v.B-v.F*s,-v.C+v.F*c])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "pingadeira-marquise":{
+    nome:"Pingadeira marquise",
+    campos:[["A","Aba frente",4],["B","Topo",25],["D","Aba final",4],["F","Bainha",1.5],["ang","Inclinação aba final (°)",20]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),a=rad(Math.min(v.ang,89)),pts=[],segs=[];
+      if(v.A>0&&v.F>0){pts.push([v.F*s,-v.A+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,0]);
+      if(v.D>0){segs.push(["D",v.D,[0.5,-0.9]]);pts.push([v.B+v.D*Math.cos(a),-v.D*Math.sin(a)])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "rufo-pingadeira":{
+    nome:"Rufo com pingadeira",
+    campos:[["A","Pingadeira",4],["B","Base",25],["C","Aba que sobe",8],["F","Bainha pingadeira",1.5],["G","Bainha topo aba",1.5]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),pts=[],segs=[];
+      if(v.A>0&&v.F>0){pts.push([v.F*s,-v.A+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,1]]);
+      pts.push([v.B,0]);
+      if(v.C>0){segs.push(["C",v.C,[1,0]]);pts.push([v.B,v.C])}
+      if(v.C>0&&v.G>0){segs.push(["G",v.G,[-0.6,-0.8]]);pts.push([v.B-v.G*s,v.C-v.G*c])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "pingadeira-rufo-reta":{
+    nome:"Pingadeira com rufo (aba reta)",
+    campos:[["A","Pingadeira",4],["B","Topo",20],["C","Aba descendo",20],["F","Bainha",1.5]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),pts=[],segs=[];
+      if(v.A>0&&v.F>0){pts.push([v.F*s,-v.A+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,0]);
+      if(v.C>0){segs.push(["C",v.C,[1,0]]);pts.push([v.B,-v.C])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "calha-beiral":{
+    nome:"Calha de beiral",
+    campos:[["A","Fundo",12],["B","Lateral traseira",15],["C","Frente degrau 1 (baixo)",5],["D","Frente degrau 2",5],["E","Frente degrau 3 (cima)",5],["S","Recuo de cada degrau",2],["T","Topo friso",3],["L","Aba friso",2],["F","Bainha friso",1.5],["G","Bainha traseira",1.5]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),pts=[],segs=[];
+      const top=v.C+v.D+v.E, xT=-2*v.S, xL=xT-v.T;
+      if(v.L>0&&v.F>0){pts.push([xL+v.F*s,top-v.L+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.L>0){pts.push([xL,top-v.L]);segs.push(["L",v.L,[-1,0]])}
+      pts.push([xL,top]);segs.push(["T",v.T,[0,-1]]);
+      pts.push([xT,top]);segs.push(["E",v.E,[1,0]]);
+      pts.push([xT,v.C+v.D]);segs.push(["S",v.S,[0,-1]]);
+      pts.push([-v.S,v.C+v.D]);segs.push(["D",v.D,[1,0]]);
+      pts.push([-v.S,v.C]);segs.push(["S",v.S,[0,-1]]);
+      pts.push([0,v.C]);segs.push(["C",v.C,[-1,0]]);
+      pts.push([0,0]);segs.push(["A",v.A,[0,1]]);
+      pts.push([v.A,0]);segs.push(["B",v.B,[1,0]]);
+      pts.push([v.A,v.B]);
+      if(v.G>0){segs.push(["G",v.G,[-0.6,-0.8]]);pts.push([v.A-v.G*s,v.B-v.G*c])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "calha-pingadeira":{
+    nome:"Calha com pingadeira",
+    campos:[["A","Fundo",12],["B","Lateral traseira",15],["C","Frente degrau 1 (baixo)",5],["D","Frente degrau 2",5],["E","Frente degrau 3 (cima)",5],["S","Recuo de cada degrau",2],["T","Topo friso",3],["L","Aba friso",2],["F","Bainha friso",1.5],["P","Topo traseiro (sobre muro)",15],["Q","Pingadeira final",3],["ang","Inclinação pingadeira (°)",20]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),a=rad(Math.min(v.ang,89)),pts=[],segs=[];
+      const top=v.C+v.D+v.E, xT=-2*v.S, xL=xT-v.T;
+      if(v.L>0&&v.F>0){pts.push([xL+v.F*s,top-v.L+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.L>0){pts.push([xL,top-v.L]);segs.push(["L",v.L,[-1,0]])}
+      pts.push([xL,top]);segs.push(["T",v.T,[0,-1]]);
+      pts.push([xT,top]);segs.push(["E",v.E,[1,0]]);
+      pts.push([xT,v.C+v.D]);segs.push(["S",v.S,[0,-1]]);
+      pts.push([-v.S,v.C+v.D]);segs.push(["D",v.D,[1,0]]);
+      pts.push([-v.S,v.C]);segs.push(["S",v.S,[0,-1]]);
+      pts.push([0,v.C]);segs.push(["C",v.C,[-1,0]]);
+      pts.push([0,0]);segs.push(["A",v.A,[0,1]]);
+      pts.push([v.A,0]);segs.push(["B",v.B,[-1,0]]);
+      pts.push([v.A,v.B]);
+      if(v.P>0){segs.push(["P",v.P,[0,-1]]);pts.push([v.A+v.P,v.B])}
+      if(v.P>0&&v.Q>0){segs.push(["Q",v.Q,[0.5,-0.9]]);pts.push([v.A+v.P+v.Q*Math.cos(a),v.B-v.Q*Math.sin(a)])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "calha-central-v":{
+    nome:"Calha central (fundo em V)",
+    campos:[["A","Aba esquerda",8],["B","Lateral esquerda",12],["C","Fundo esquerdo",15],["D","Fundo direito",15],["E","Lateral direita",12],["G","Aba direita",8],["F","Bainha abas (cada)",1],["ang","Caimento fundo (°)",10]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),a=rad(Math.min(v.ang,60)),pts=[],segs=[];
+      const V=[v.C*Math.cos(a),-v.C*Math.sin(a)], R=[V[0]+v.D*Math.cos(a),V[1]+v.D*Math.sin(a)];
+      const yL=v.B, yR=R[1]+v.E;
+      if(v.A>0&&v.F>0){pts.push([-v.A+v.F*s,yL-v.F*c]);segs.push(["F",v.F,[-0.6,0.8]])}
+      if(v.A>0){pts.push([-v.A,yL]);segs.push(["A",v.A,[0,-1]])}
+      pts.push([0,yL]);segs.push(["B",v.B,[-1,0]]);
+      pts.push([0,0]);segs.push(["C",v.C,[-0.3,1]]);
+      pts.push(V);segs.push(["D",v.D,[0.3,1]]);
+      pts.push(R);segs.push(["E",v.E,[1,0]]);
+      pts.push([R[0],yR]);
+      if(v.G>0){segs.push(["G",v.G,[0,-1]]);pts.push([R[0]+v.G,yR])}
+      if(v.G>0&&v.F>0){segs.push(["F",v.F,[0.6,0.8]]);pts.push([R[0]+v.G-v.F*s,yR-v.F*c])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "pingadeira-rufo-inclinado":{
+    nome:"Pingadeira com rufo (inclinado)",
+    campos:[["A","Pingadeira",4],["B","Topo",15],["C","Rufo inclinado",15],["D","Aba descendo",6],["F","Bainha",1.5],["ang","Inclinação rufo (°)",40]],
+    perfil(v){
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),a=rad(Math.min(v.ang,89)),pts=[],segs=[];
+      if(v.A>0&&v.F>0){pts.push([v.F*s,-v.A+v.F*c]);segs.push(["F",v.F,[0.8,0.6]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,0]);segs.push(["C",v.C,[0.6,-0.8]]);
+      const P=[v.B+v.C*Math.cos(a),-v.C*Math.sin(a)];pts.push(P);
+      if(v.D>0){segs.push(["D",v.D,[1,0]]);pts.push([P[0],P[1]-v.D])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  }
+};
+let cur="platibanda",ready=false,renderer,scene,cam,ctl,mat,edgeMat,group,stage,center,radius=50,last=null,firstView=true;
+function renderTabs(){$("p3tabs").innerHTML=Object.entries(PIECES).map(([k,p])=>`<button data-k="${k}" aria-pressed="${k===cur}">${p.nome}</button>`).join("")}
+function renderFields(){
+  const p=PIECES[cur];
+  $("p3fields").innerHTML=p.campos.map(([k,l,d])=>{const tag=k.length===1?`<span class="p3-tag">${k}</span>`:"";return `<div class="p3-f"><label for="p3-${cur}-${k}">${tag}${l}</label><input id="p3-${cur}-${k}" data-k="${k}" type="number" step="0.5" min="0" inputmode="decimal" value="${d}"></div>`}).join("")+
+    `<div class="p3-f"><label for="p3-${cur}-len">Comprimento</label><input id="p3-${cur}-len" data-k="len" type="number" step="10" min="10" inputmode="decimal" value="100"></div>`;
+  $("p3fields").querySelectorAll("input").forEach(i=>i.addEventListener("input",update));
+}
+function vals(){const o={};$("p3fields").querySelectorAll("input").forEach(i=>{o[i.dataset.k]=Math.max(0,parseFloat(i.value)||0)});o.len=Math.max(1,o.len);return o}
+function resize(){if(!ready)return;const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(group&&group.children.length)refit()}
+function init(){
+  if(ready)return;ready=true;
+  const canvas=$("p3c");stage=canvas.parentElement;
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(35,1,1,5000);
+  ctl=new THREE.OrbitControls(cam,canvas);ctl.enableDamping=true;ctl.addEventListener("start",()=>{moved=true});
+  scene.add(new THREE.HemisphereLight(0xffffff,0x667788,0.75));
+  const sun=new THREE.DirectionalLight(0xffffff,0.9);sun.position.set(80,140,120);scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xffffff,0.35);fill.position.set(-100,40,-80);scene.add(fill);
+  mat=new THREE.MeshStandardMaterial({color:0xb8c0c6,metalness:0.55,roughness:0.38,side:THREE.DoubleSide});
+  edgeMat=new THREE.LineBasicMaterial({color:0x3a444b});
+  group=new THREE.Group();scene.add(group);center=new THREE.Vector3();
+  new ResizeObserver(resize).observe(stage);
+  (function loop(){requestAnimationFrame(loop);if($("v3d").hidden)return;ctl.update();renderer.render(scene,cam)})();
+  $("p3tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)select(b.dataset.k)});
+  $("p3iso").onclick=viewIso;$("p3front").onclick=viewFront;
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>last&&drawSection(last));
+}
+function build(pts,L){
+  const t=0.2;scene.remove(group);group.traverse(o=>{o.geometry&&o.geometry.dispose()});group=new THREE.Group();
+  for(let i=0;i<pts.length-1;i++){
+    const [x1,y1]=pts[i],[x2,y2]=pts[i+1],dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy);if(l<0.01)continue;
+    const g=new THREE.BoxGeometry(l+t,t,L),m=new THREE.Mesh(g,mat);
+    m.position.set((x1+x2)/2,(y1+y2)/2,0);m.rotation.z=Math.atan2(dy,dx);
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),edgeMat));group.add(m);
+  }
+  scene.add(group);
+  const box=new THREE.Box3().setFromObject(group);box.getCenter(center);box.getSize(bsize);radius=bsize.length()/2;ctl.target.copy(center);
+}
+let mode="iso",moved=false,bsize=new THREE.Vector3(1,1,1);
+function fovs(){const v=rad(cam.fov),h=2*Math.atan(Math.tan(v/2)*cam.aspect);return [v,h]}
+function viewIso(){mode="iso";moved=false;const [v,h]=fovs(),f=Math.min(v,h),r=radius||1,d=r/Math.sin(f/2)*1.04;
+  const dir=new THREE.Vector3(1.1,0.75,1.4).normalize();cam.position.copy(center).addScaledVector(dir,d);cam.near=Math.max(0.1,d/100);cam.far=d*10;cam.updateProjectionMatrix();ctl.target.copy(center);ctl.update()}
+function viewFront(){mode="front";moved=false;const [v,h]=fovs(),hx=bsize.x/2,hy=bsize.y/2,d=Math.max(hy/Math.tan(v/2),hx/Math.tan(h/2))*1.2+bsize.z/2;
+  cam.position.set(center.x,center.y,center.z+d);cam.near=Math.max(0.1,d/100);cam.far=d*10;cam.updateProjectionMatrix();ctl.target.copy(center);ctl.update()}
+function refit(){if(!moved)(mode==="front"?viewFront:viewIso)()}
+function drawSection(r){
+  const {pts,segs}=r,svg=$("p3sec"),xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const W=320,H=210,pad=36,s=Math.min((W-2*pad)/Math.max(maxX-minX,1),(H-2*pad)/Math.max(maxY-minY,1));
+  const ox=(W-(maxX-minX)*s)/2-minX*s,oy=(H+(maxY-minY)*s)/2+minY*s,P=([x,y])=>[ox+x*s,oy-y*s];
+  const fg=css("--fg"),dim=css("--dim"),mu=css("--muted");
+  let h=`<polyline points="${pts.map(p=>P(p).join(",")).join(" ")}" fill="none" stroke="${fg}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  for(let i=0;i<pts.length-1;i++){const [k,val,n]=segs[i];if(!k)continue;const [a,b]=[P(pts[i]),P(pts[i+1])],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+    h+=`<text x="${mx+n[0]*20}" y="${my+n[1]*16+4}" text-anchor="middle" font-size="12" fill="${dim}" font-weight="600">${k} ${fmt(val,val%1?1:0)}</text>`}
+  if(r.ang!==undefined){const [x0,y0]=P([0,0]);h+=`<text x="${x0}" y="${y0-14}" text-anchor="middle" font-size="11" fill="${mu}">${fmt(r.ang,0)}° / ${fmt(180-2*r.ang,0)}° abertura</text>`}
+  h+=`<text x="${W-6}" y="${H-6}" text-anchor="end" font-size="10" fill="${mu}">cm</text>`;svg.innerHTML=h;
+}
+function update(){
+  const v=vals(),r=PIECES[cur].perfil(v);last=r;const dev=r.segs.reduce((a,s)=>a+s[1],0);
+  $("p3dev").textContent=fmt(dev)+" cm";$("p3area").textContent=fmt(dev/100*v.len/100,2)+" m²";$("p3dob").textContent=r.dob;
+  drawSection(r);build(r.pts,v.len);if(firstView){viewIso();firstView=false}else refit()
+}
+function select(k){cur=k;try{history.replaceState(null,"","#p-"+k)}catch(e){}renderTabs();renderFields();firstView=true;resize();update()}
+window.P3={show(h){init();let k=h&&h.startsWith("p-")?h.slice(2):cur;if(!(k in PIECES))k=cur;requestAnimationFrame(()=>{resize();select(k)})}};
+})();
+
+/* Alterna Tabela de preços / Peças 3D */
+(function(){
+  const $=id=>document.getElementById(id);
+  function show(view,h){
+    const p3=view==="pecas";
+    $("vTab").hidden=p3;$("v3d").hidden=!p3;$("tabActions").hidden=p3;
+    $("swTab").classList.toggle("on",!p3);$("swP3").classList.toggle("on",p3);
+    $("hTitle").textContent=p3?"Peças Dobradas 3D":"Tabela de Preços";
+    if(p3)P3.show(h);
+  }
+  function route(){const h=location.hash.slice(1);show(h==="pecas"||h.startsWith("p-")?"pecas":"tabela",h)}
+  $("swTab").onclick=()=>{location.hash="tabela";window.scrollTo(0,0)};
+  $("swP3").onclick=()=>{location.hash="pecas";window.scrollTo(0,0)};
+  addEventListener("hashchange",route);route();
+})();
 </script>
 
 </body></html>
