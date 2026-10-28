@@ -266,18 +266,33 @@ const PIECES={
       return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
     }
   },
-  "rufo-chapeu":{
-    nome:"Rufo chapéu",
-    campos:[["A","Aba esquerda",12],["B","Topo",20],["C","Lateral esquerda",10],["D","Lateral direita",10],["E","Aba direita",12],["ang","Caimento abas (°)",30]],
+  "rufo-pingadeira-duplo":{
+    nome:"Rufo com pingadeira duplo",
+    campos:[["A","Pingadeira esquerda",4],["B","Aba esquerda",10],["C","Lateral esquerda",8],["D","Topo (parede)",20],["E","Lateral direita",8],["F","Aba direita",10],["G","Pingadeira direita",4]],
     perfil(v){
-      const a=rad(Math.min(v.ang,80)),c=Math.cos(a),s=Math.sin(a),pts=[],segs=[];
-      const yR=v.C-v.D;
-      if(v.A>0){pts.push([-v.A*c,-v.A*s]);segs.push(["A",v.A,[-0.5,-0.9]])}
-      pts.push([0,0]);segs.push(["C",v.C,[-1,0]]);
-      pts.push([0,v.C]);segs.push(["B",v.B,[0,-1]]);
-      pts.push([v.B,v.C]);segs.push(["D",v.D,[1,0]]);
-      pts.push([v.B,yR]);
-      if(v.E>0){segs.push(["E",v.E,[0.5,-0.9]]);pts.push([v.B+v.E*c,yR-v.E*s])}
+      const pts=[],segs=[];
+      if(v.B>0&&v.A>0){pts.push([-v.B,-v.C-v.A]);segs.push(["A",v.A,[-1,0]])}
+      if(v.B>0){pts.push([-v.B,-v.C]);segs.push(["B",v.B,[0,-1]])}
+      pts.push([0,-v.C]);segs.push(["C",v.C,[-1,0]]);
+      pts.push([0,0]);segs.push(["D",v.D,[0,-1]]);
+      pts.push([v.D,0]);segs.push(["E",v.E,[1,0]]);
+      pts.push([v.D,-v.E]);
+      if(v.F>0){segs.push(["F",v.F,[0,-1]]);pts.push([v.D+v.F,-v.E])}
+      if(v.F>0&&v.G>0){segs.push(["G",v.G,[1,0]]);pts.push([v.D+v.F,-v.E-v.G])}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
+  },
+  "rufo-chapeu":{
+    nome:"Rufo chapéu (galpão)",
+    campos:[["A","Lateral esquerda",8],["B","Topo",25],["C","Lateral direita",8],["E","Pingadeira (cada)",2],["ang","Inclinação pingadeira (°)",30]],
+    perfil(v){
+      const a=rad(Math.min(v.ang,89)),ca=Math.cos(a),sa=Math.sin(a),pts=[],segs=[];
+      if(v.A>0&&v.E>0){pts.push([-v.E*ca,-v.A-v.E*sa]);segs.push(["E",v.E,[-0.6,0.8]])}
+      if(v.A>0){pts.push([0,-v.A]);segs.push(["A",v.A,[-1,0]])}
+      pts.push([0,0]);segs.push(["B",v.B,[0,-1]]);
+      pts.push([v.B,0]);
+      if(v.C>0){segs.push(["C",v.C,[1,0]]);pts.push([v.B,-v.C])}
+      if(v.C>0&&v.E>0){segs.push(["E",v.E,[0.6,0.8]]);pts.push([v.B+v.E*ca,-v.C-v.E*sa])}
       return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
     }
   },
@@ -548,6 +563,13 @@ function roof(x0,y0,dir,len,slope,o={}){
   }
   return pt;
 }
+// fechamento lateral em telha trapezoidal vertical: face interna em xface, nervuras para fora (dir 1 = para a esquerda)
+function cladding(xface,dir,ybot,ytop){
+  const H=ytop-ybot;if(H<=0)return;
+  const g=trapGeom(Z2-Z1,H);g.rotateX(-Math.PI/2);g.rotateY(Math.PI/2);g.translate(0,ybot,Z2);
+  const m=new THREE.Mesh(g,M.sheet);m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,25),sheetEdge));
+  m.scale.x=dir;m.position.x=xface;ctx.add(m);
+}
 // viga metálica (perfil I) — mesa superior em ytop
 function ibeam(x1,x2,ytop,h){
   const m=(x1+x2)/2;
@@ -613,11 +635,20 @@ const OBRA={
     roof(-1.5,yl,-1,85,-a,{wood:true});roof(1.5,yr,1,85,-a,{wood:true});
     const top=Math.min(yl,yr)-5*ta-0.5;wood(-5,5,top-18,top);
   },
+  "rufo-pingadeira-duplo"(v){
+    // parede atravessa o telhado; telhas descem dos dois lados por baixo das abas com pingadeira
+    const ta=tg(15),yl=Math.min(-v.C-Math.max(v.A,0)-1+v.B*ta,-v.C-1),yr=Math.min(-v.E-Math.max(v.G,0)-1+v.F*ta,-v.E-1);
+    wall(0.3,v.D-0.3,-90,-0.3);
+    roof(-0.3,yl-4,-1,85,-15,{wood:true});
+    roof(v.D+0.3,yr-4,1,85,-15,{wood:true});
+  },
   "rufo-chapeu"(v){
-    const a=Math.min(v.ang,80),ta=tg(a),yR=v.C-v.D;
-    wall(0.3,v.B-0.3,-60,v.C-0.3);
-    roof(-0.5,-0.5*ta-4.5,-1,85,-a,{wood:true});
-    roof(v.B+0.5,yR-0.5*ta-4.5,1,85,-a,{wood:true});
+    // galpão: estrutura metálica no meio, fechamento em telha metálica simples dos dois lados
+    const t=Math.min(4.3,Math.max(1.5,(v.B-6)/2)),yb=-95;
+    cladding(0.3+t,1,yb,-0.3);
+    cladding(v.B-0.3-t,-1,yb,-0.3);
+    const x1=0.3+t+0.4,x2=v.B-0.3-t-0.4;
+    if(x2-x1>1){box(x1,x2,yb,-0.3,M.steel);if(x2-x1>4)box(x1+1,x2-1,yb,-1.2,new THREE.MeshStandardMaterial({color:0x272d33,metalness:.5,roughness:.55}),Z1+0.8,Z2-0.8)}
   },
   "calha-central"(v){
     // apoiada nos perfis das duas laterais: abas sobre a mesa das vigas
@@ -705,7 +736,8 @@ const APP={
   "rufo-convencional":"Vedação entre parede e telhado: aba e bainha encostadas na parede, capa sobre a telha e aba da frente apoiada nela.",
   "rufo-testeira":"Capa de muro/platibanda com testeira frontal e pingadeira afastando a água da parede; telhado encostado atrás.",
   "cumeeira":"No topo do telhado, cobre o encontro das duas águas, com as abas apoiadas sobre as telhas.",
-  "rufo-chapeu":"Capa de parede que atravessa o telhado, com abas apoiadas sobre as telhas dos dois lados.",
+  "rufo-pingadeira-duplo":"Capa da parede que atravessa o telhado: topo sobre a parede e, dos dois lados, aba com pingadeira passando por cima das telhas.",
+  "rufo-chapeu":"Pingadeira de galpão: cobre o topo da estrutura metálica e o fechamento em telha metálica simples dos dois lados, com pingadeiras de ~2 cm afastando a água da telha.",
   "calha-central":"Entre dois telhados que caem para o centro, apoiada pelas abas sobre os perfis das duas laterais; as telhas despejam dos dois lados.",
   "rufo-pingadeira":"Sobre a laje/ressalto junto à parede: aba sobe na parede e a pingadeira fica 3 cm para fora da borda.",
   "pingadeira":"Capa do topo do muro, com as pingadeiras 3 cm afastadas da parede dos dois lados.",
