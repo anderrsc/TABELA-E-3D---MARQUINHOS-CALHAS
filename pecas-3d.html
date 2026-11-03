@@ -34,9 +34,10 @@ h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
 @media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
 .stage{position:relative;background:radial-gradient(120% 100% at 50% 28%,var(--stage-hi),var(--stage));border:1px solid var(--line);border-radius:12px;min-height:540px;box-shadow:0 1px 3px rgba(16,24,32,.06);overflow:hidden}
 #c{display:block;width:100%;height:100%;position:absolute;inset:0}
-.watermark{position:absolute;inset:0;width:100%;height:100%;opacity:.13;pointer-events:none;user-select:none}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .watermark{filter:brightness(0) invert(1);opacity:.10}}
-:root[data-theme="dark"] .watermark{filter:brightness(0) invert(1);opacity:.10}
+.watermark{position:absolute;inset:0;width:100%;height:100%;opacity:.06;pointer-events:none;user-select:none;mask-image:linear-gradient(transparent,#000 52px,#000 calc(100% - 42px),transparent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .watermark{filter:brightness(0) invert(1);opacity:.05}}
+:root[data-theme="dark"] .watermark{filter:brightness(0) invert(1);opacity:.05}
+@media print{:root .stage .watermark{opacity:.15;mask-image:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 .hint{position:absolute;left:12px;bottom:12px;font-size:12px;color:var(--muted);pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 10px;opacity:.9}
 .views,.mode{position:absolute;top:12px;display:flex;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 .views{right:12px} .mode{left:12px}
@@ -77,8 +78,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <canvas id="c"></canvas>
       <svg class="watermark" aria-hidden="true" focusable="false">
         <defs>
-          <pattern id="marquinhos-watermark" width="144" height="88" patternUnits="userSpaceOnUse">
-            <image href="/marca-marquinhos.png" x="24" y="10" width="96" height="67" transform="rotate(-12 72 44)" />
+          <pattern id="marquinhos-watermark" width="176" height="216" patternUnits="userSpaceOnUse">
+            <image href="/marca-marquinhos.png" x="6" y="23" width="88" height="62" transform="rotate(-10 50 54)" />
+            <image href="/marca-marquinhos.png" x="82" y="131" width="88" height="62" transform="rotate(-10 126 162)" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#marquinhos-watermark)" />
