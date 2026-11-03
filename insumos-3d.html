@@ -162,6 +162,21 @@ const ITEMS={
     campos:[["len","Comprimento",30],["dia","Diâmetro",5]],
     app:"Selante usado na vedação de emendas, cabeceiras, bocais e encontros de calhas, rufos e pingadeiras com a alvenaria.",
     app2:"Aplicado com pistola para sachê: corta-se uma ponta do sachê e o cordão é puxado sobre a emenda já rebitada.",
+    modo:"Sachê",
+    model:(v)=>sachet(v.len,v.dia),
+    vol:(v)=>{const R=v.dia/2,e=Math.min(R*1.15,v.len*0.18);return Math.PI*R*R*(v.len-2*e)+2*(Math.PI*e/3)*(R*R+R*R*0.13+R*R*0.0169)},
+  },
+  "tubo-silicone":{
+    code:"22",
+    nome:"Tubo de Silicone",
+    emb:"Cartucho com bico",
+    un:"unidade",
+    campos:[["len","Comprimento",21.5],["dia","Diâmetro",4.8]],
+    app:"Silicone para acabamento e vedação de pequenas frestas, encontros de rufos e pingadeiras com a alvenaria e fixação de peças leves.",
+    app2:"Rosqueia-se o bico no cartucho, corta-se a ponta do bico no diâmetro do cordão e aplica-se com pistola comum de cartucho.",
+    modo:"Cartucho",
+    model:(v)=>cartridge(v.len,v.dia),
+    vol:(v)=>{const r=v.dia/2-0.15;return Math.PI*r*r*Math.max(0,v.len-2.2)},
   },
 };
 const ORDER=Object.keys(ITEMS);
@@ -193,6 +208,9 @@ const M={
   clip:new THREE.MeshStandardMaterial({color:0x4d5257,metalness:0.85,roughness:0.35}),
   sheet:new THREE.MeshStandardMaterial({color:0x9aa3aa,metalness:0.45,roughness:0.42,side:THREE.DoubleSide,envMapIntensity:0.6}),
   sheet2:new THREE.MeshStandardMaterial({color:0xb4bcc2,metalness:0.4,roughness:0.45,side:THREE.DoubleSide,envMapIntensity:0.6}),
+  tube:new THREE.MeshStandardMaterial({color:0x4f555b,metalness:0.35,roughness:0.3,envMapIntensity:0.6,side:THREE.DoubleSide}),
+  tube2:new THREE.MeshStandardMaterial({color:0x43494e,metalness:0.35,roughness:0.38,envMapIntensity:0.6,side:THREE.DoubleSide}),
+  dark:new THREE.MeshStandardMaterial({color:0x2c3034,roughness:0.8,side:THREE.DoubleSide}),
   bead:new THREE.MeshStandardMaterial({color:0x3e4348,metalness:0.05,roughness:0.6}),
   rivet:new THREE.MeshStandardMaterial({color:0xdfe3e6,metalness:0.9,roughness:0.25}),
   wall:new THREE.MeshStandardMaterial({color:0xc9c3b8,roughness:0.95,envMapIntensity:0.5}),
@@ -233,6 +251,44 @@ function sachet(len,dia){
   return g;
 }
 
+/* Cartucho: corpo cilíndrico com bordas, ombro e bico rosqueado na frente (-X); bico cônico solto ao lado. */
+function cartridge(len,dia){
+  const g=new THREE.Group(),R=dia/2;
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(R,R,len,64,1,true),M.tube);
+  body.rotation.z=Math.PI/2;g.add(body);
+  for(const s of[-1,1]){
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(R*1.01,R*0.06,12,64),M.tube);
+    rim.rotation.y=Math.PI/2;rim.position.x=s*(len/2-R*0.06);g.add(rim);
+  }
+  // fundo (êmbolo levemente recuado)
+  const back=new THREE.Mesh(new THREE.CircleGeometry(R*0.97,64),M.tube2);
+  back.rotation.y=Math.PI/2;back.position.x=len/2-R*0.18;g.add(back);
+  // ombro da frente
+  const front=new THREE.Mesh(new THREE.CylinderGeometry(R*0.98,R*0.98,R*0.08,64),M.tube2);
+  front.rotation.z=Math.PI/2;front.position.x=-len/2+R*0.04;g.add(front);
+  // bico rosqueado
+  const nl=R*0.95,nr=R*0.36,x0=-len/2;
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(nr,nr,nl,40),M.tube);
+  neck.rotation.z=Math.PI/2;neck.position.x=x0-nl/2;g.add(neck);
+  for(let k=0;k<5;k++){
+    const th=new THREE.Mesh(new THREE.TorusGeometry(nr*1.02,nr*0.13,10,40),M.tube);
+    th.rotation.y=Math.PI/2;th.position.x=x0-nl*(0.22+k*0.17);g.add(th);
+  }
+  const hole=new THREE.Mesh(new THREE.CircleGeometry(nr*0.62,32),M.dark);
+  hole.rotation.y=-Math.PI/2;hole.position.x=x0-nl-0.01;g.add(hole);
+  // bico cônico solto
+  const cl=len*0.5,cone=new THREE.Group();
+  const tip=new THREE.Mesh(new THREE.CylinderGeometry(R*0.09,nr*1.15,cl,40,1,true),M.tube);
+  tip.position.y=cl/2;cone.add(tip);
+  const collar=new THREE.Mesh(new THREE.CylinderGeometry(nr*1.32,nr*1.32,cl*0.12,40,1,true),M.tube);
+  collar.position.y=cl*0.06;cone.add(collar);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(nr*1.0,nr*1.32,40),M.tube);
+  ring.rotation.x=Math.PI/2;cone.add(ring);
+  cone.rotation.z=-Math.PI/2;cone.rotation.y=-0.25;
+  cone.position.set(-len/2-nl*0.4,-R*0.55,R*1.9);g.add(cone);
+  return g;
+}
+
 /* Na obra: trecho de calha com emenda rebitada recebendo o cordão de PU, sachê ao lado. */
 function obra(len,dia){
   const g=new THREE.Group();
@@ -263,7 +319,7 @@ function obra(len,dia){
   }
   // parede de apoio
   const w=new THREE.Mesh(new THREE.BoxGeometry(2,H+8,L),M.wall);w.position.set(-W/2-1.15,(H+8)/2-2,0);g.add(w);
-  const s=sachet(len,dia);s.position.set(W/2+dia/2+6,dia/2-0.2,-L/4);s.rotation.y=Math.PI/2.3;g.add(s);
+  const s=ITEMS[cur].model({len,dia});s.position.set(W/2+dia/2+6,dia/2-0.2,-L/4);s.rotation.y=Math.PI/2.3;g.add(s);
   return g;
 }
 
@@ -271,12 +327,10 @@ function clear(){while(group.children.length){const c=group.children.pop();c.tra
 function vals(){const o={};$("fields").querySelectorAll("input").forEach(i=>{o[i.dataset.k]=Math.max(0.5,parseFloat(i.value)||0)});return o}
 function update(){
   const v=vals();clear();
-  group.add(mode==="obra"?obra(v.len,v.dia):sachet(v.len,v.dia));
+  group.add(mode==="obra"?obra(v.len,v.dia):ITEMS[cur].model(v));
   const box=new THREE.Box3().setFromObject(group);box.getCenter(center);box.getSize(bsize);
   radius=box.getBoundingSphere(new THREE.Sphere()).radius;
-  // volume: corpo cilíndrico + pontas aproximadas como cones truncados
-  const R=v.dia/2,endL=Math.min(R*1.15,v.len*0.18);
-  const vol=Math.PI*R*R*(v.len-2*endL)+2*(Math.PI*endL/3)*(R*R+R*R*0.13+R*R*0.0169);
+  const vol=ITEMS[cur].vol(v);
   $("rVol").textContent=fmt(Math.round(vol/10)*10)+" ml";
   refit();requestDraw();
 }
@@ -308,7 +362,7 @@ function select(k){
   $("item-title").textContent=it.nome;
   document.title=it.nome+" | Marquinhos Calhas";
   $("app").textContent=it.app;$("app2").textContent=it.app2;
-  $("rEmb").textContent=it.emb;$("rUn").textContent=it.un;
+  $("rEmb").textContent=it.emb;document.querySelector('#mode [data-m="peca"]').textContent=it.modo;$("rUn").textContent=it.un;
   $("fields").innerHTML="";
   for(const[kk,l,d]of it.campos){
     const f=document.createElement("div");f.className="f";
