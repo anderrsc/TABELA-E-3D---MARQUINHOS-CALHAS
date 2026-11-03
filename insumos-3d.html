@@ -145,18 +145,6 @@ const fmt=(v,d=0)=>v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFrac
 
 /* Insumos: cada um tem campos editáveis (cm), textos e o modelo 3D. */
 const ITEMS={
-  "tubo-pu-ms40":{
-    code:"21",
-    nome:"Tubo Vedante PU MS40",
-    emb:"Sachê (salsicha)",
-    un:"tubo",
-    campos:[["len","Comprimento",30],["dia","Diâmetro",5]],
-    app:"Selante usado na vedação de emendas, cabeceiras, bocais e encontros de calhas, rufos e pingadeiras com a alvenaria.",
-    app2:"Aplicado com pistola para sachê: corta-se uma ponta do sachê e o cordão é puxado sobre a emenda já rebitada.",
-    modo:"Sachê",
-    model:(v)=>sachet(v.len,v.dia),
-    vol:(v)=>{const R=v.dia/2,e=Math.min(R*1.15,v.len*0.18);return Math.PI*R*R*(v.len-2*e)+2*(Math.PI*e/3)*(R*R+R*R*0.13+R*R*0.0169)},
-  },
   "tubo-silicone":{
     code:"22",
     nome:"Tubo de Silicone",
