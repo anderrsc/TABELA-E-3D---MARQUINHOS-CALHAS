@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Peças Dobradas 3D</title>
+<title>Catálogo de peças 3D | Marquinhos Calhas</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: seletor de peças no topo, viewer 3D à esquerda, painel de medidas + corte à direita; empilha no celular */
 :root{
-  --bg:#ffffff; --panel:#ffffff; --fg:#1d2327; --muted:#5d6870; --line:#d3d8db;
+  --bg:#f4f3f1; --panel:#ffffff; --fg:#202427; --muted:#58616a; --line:#e1dfdb;
   --accent:#d7141b; --stage:#d9dee2; --stage-hi:#f7f8f9; --dim:#c2410c;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
@@ -20,34 +20,67 @@
 :root[data-theme="dark"]{
   --bg:#14181b; --panel:#1c2126; --fg:#e6eaed; --muted:#97a3ab; --line:#2f363c;
   --accent:#ef4b52; --stage:#1a1f23; --stage-hi:#2c3339; --dim:#f08a4b; color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-family:var(--sans);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px}
-.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
-h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
-.sub{color:var(--muted);font-size:13px}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,32,.06)}
-.tabs button{font:500 13px var(--sans);background:var(--bg);color:var(--fg);border:1px solid transparent;border-radius:999px;padding:6px 13px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-.tabs button:hover{border-color:var(--line);background:var(--panel)}
-.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}
-@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
-.stage{position:relative;background:radial-gradient(120% 100% at 50% 28%,var(--stage-hi),var(--stage));border:1px solid var(--line);border-radius:12px;min-height:540px;box-shadow:0 1px 3px rgba(16,24,32,.06);overflow:hidden}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+  padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:24px 36px}
+.wrap{max-width:1440px;margin:auto;display:grid;gap:20px}
+.masthead{display:flex;align-items:center;gap:24px;padding:0 4px 17px;border-bottom:1px solid var(--line)}
+.brand{position:relative;width:154px;height:55px;overflow:hidden;flex:none}
+.brand img{position:absolute;width:100%;height:auto;top:50%;transform:translateY(-50%)}
+:root[data-theme="dark"] .brand{background:#fff;border-radius:8px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand{background:#fff;border-radius:8px}}
+.eyebrow{margin:0 0 4px;color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+h1{margin:0;font-size:clamp(22px,2.5vw,34px);font-weight:600;letter-spacing:-.04em;line-height:1.1}
+.sub{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
+.grid{display:grid;grid-template-columns:216px minmax(0,1fr) 292px;gap:16px;align-items:start}
+.catalog,.viewer,.card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.catalog{padding:14px 9px 9px}
+.catalog h2{margin:0 7px 10px;font-size:14px}
+.tabs{display:grid;gap:2px;max-height:min(66vh,620px);overflow:auto;scrollbar-width:thin}
+.tabs button{display:flex;align-items:baseline;gap:9px;width:100%;padding:9px 8px;border:0;border-radius:7px;background:transparent;color:var(--fg);text-align:left;font:500 13px/1.3 var(--sans);cursor:pointer}
+.tabs button:hover{background:var(--bg)}
+.tabs button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 12%,var(--panel));color:var(--fg);font-weight:600}
+.tabs .piece-index{flex:none;color:var(--muted);font:500 10px var(--mono)}
+.tabs button[aria-pressed="true"] .piece-index{color:var(--accent)}
+.mobile-picker{display:none}
+.viewer{overflow:hidden}
+.viewer-title{padding:16px 18px 14px}
+.viewer-title h2{margin:0;font-size:clamp(20px,2.3vw,27px);line-height:1.12;letter-spacing:-.03em;font-weight:600}
+.viewer-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-block:1px solid var(--line);background:var(--bg)}
+.stage{position:relative;background:radial-gradient(120% 100% at 50% 28%,var(--stage-hi),var(--stage));height:clamp(390px,58vh,650px);overflow:hidden}
+@media(max-width:1099px){
+  .grid{grid-template-columns:minmax(0,1fr) 278px}
+  .catalog{grid-column:1/-1;padding:12px 14px}
+  .catalog h2,.tabs{display:none}
+  .mobile-picker{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600}
+  .mobile-picker select{flex:1;min-width:0;max-width:400px}
+}
+.mobile-picker select{background:var(--panel);color:var(--fg);font:500 14px var(--sans);padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+@media(max-width:670px){
+  body{padding-block:14px 24px;padding-inline:12px}
+  .wrap,.grid{gap:12px}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .masthead{gap:13px;padding:0 0 12px}
+  .brand{width:106px;height:43px}
+  .masthead .sub{display:none}
+  .eyebrow{font-size:9px}
+  .viewer-title{padding:13px 12px}
+  .stage{height:clamp(290px,52svh,430px)}
+  .mobile-picker{gap:8px}
+}
 #c{display:block;width:100%;height:100%;position:absolute;inset:0}
 .watermark{position:absolute;inset:0;width:100%;height:100%;opacity:.06;pointer-events:none;user-select:none;mask-image:linear-gradient(transparent,#000 52px,#000 calc(100% - 42px),transparent)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .watermark{filter:brightness(0) invert(1);opacity:.05}}
 :root[data-theme="dark"] .watermark{filter:brightness(0) invert(1);opacity:.05}
 @media print{:root .stage .watermark{opacity:.15;mask-image:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
-.hint{position:absolute;left:12px;bottom:12px;font-size:12px;color:var(--muted);pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 10px;opacity:.9}
-.views,.mode{position:absolute;top:12px;display:flex;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.views{right:12px} .mode{left:12px}
-.views button,.mode button{font:500 12px var(--sans);background:transparent;color:var(--fg);border:0;border-radius:6px;padding:6px 11px;cursor:pointer}
+.hint{margin:0;padding:10px 13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.4}
+.views,.mode{display:flex;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:9px}
+.views button,.mode button{min-height:32px;font:500 12px var(--sans);background:transparent;color:var(--fg);border:0;border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap}
 .views button:hover,.mode button:hover{background:var(--bg)}
-.mode button[aria-pressed="true"]:hover{background:var(--accent)}
-.mode button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-.side{display:flex;flex-direction:column;gap:16px;min-width:0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(16,24,32,.06)}
-.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;font-weight:600}
+.views button[aria-pressed="true"],.mode button[aria-pressed="true"]{background:#c9131b;color:#fff}
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{padding:14px 16px}
+.lbl{font-size:14px;color:var(--fg);margin:0 0 10px;font-weight:600}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .f{display:flex;flex-direction:column;gap:4px}
 .f label{font-size:12px;color:var(--muted)}
@@ -57,7 +90,7 @@ h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
 .res{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px}
 .res dt{color:var(--muted)} .res dd{margin:0;font:600 14px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
 .res .big{font-size:18px;color:var(--accent)}
-.app{margin:0 0 10px;font-size:14px;line-height:1.45}
+.app{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.5}
 .legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .legend i{width:11px;height:11px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.15)}
@@ -67,14 +100,35 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Peças Dobradas 3D</h1>
-    <span class="sub">Medidas em cm · gire com o mouse/dedo, zoom com scroll/pinça</span>
+<main class="wrap">
+  <header class="masthead">
+    <div class="brand"><img src="/marca-marquinhos.png" alt="Marquinhos Calhas e Esquadrias" width="1000" height="700"></div>
+    <div>
+      <p class="eyebrow">Marquinhos Calhas e Esquadrias</p>
+      <h1>Catálogo de peças 3D</h1>
+      <p class="sub">Explore os perfis e veja como cada peça é aplicada na obra.</p>
+    </div>
   </header>
-  <nav class="tabs" id="tabs" aria-label="Peças"></nav>
   <div class="grid">
-    <div class="stage">
+    <aside class="catalog" aria-label="Catálogo de peças">
+      <h2>Escolha uma peça</h2>
+      <nav class="tabs" id="tabs" aria-label="Peças"></nav>
+      <label class="mobile-picker" for="piece-picker">Peça <select id="piece-picker"></select></label>
+    </aside>
+    <section class="viewer" aria-labelledby="piece-title">
+      <div class="viewer-title">
+        <p class="eyebrow" id="piece-index"></p>
+        <h2 id="piece-title" aria-live="polite"></h2>
+      </div>
+      <div class="viewer-toolbar">
+        <div class="mode" id="mode" role="group" aria-label="Exibição">
+          <button type="button" data-m="peca">Peça</button><button type="button" data-m="obra">Na obra</button>
+        </div>
+        <div class="views" role="group" aria-label="Ângulo de visualização">
+          <button type="button" id="vIso" aria-pressed="true">3D</button><button type="button" id="vFront" aria-pressed="false">Corte</button>
+        </div>
+      </div>
+      <div class="stage">
       <canvas id="c"></canvas>
       <svg class="watermark" aria-hidden="true" focusable="false">
         <defs>
@@ -85,21 +139,16 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         </defs>
         <rect width="100%" height="100%" fill="url(#marquinhos-watermark)" />
       </svg>
-      <div class="mode" id="mode" role="group" aria-label="Exibição">
-        <button data-m="peca">Peça</button><button data-m="obra">Na obra</button>
       </div>
-      <div class="views">
-        <button id="vIso">3D</button><button id="vFront">Corte</button>
-      </div>
-      <div class="hint">Arrastar: girar · Botão direito: mover</div>
-    </div>
+      <p class="hint">Arraste para girar. Use a rolagem ou a pinça para aproximar.</p>
+    </section>
     <div class="side">
       <div class="card">
-        <p class="lbl">Medidas</p>
+        <h3 class="lbl">Medidas <span class="sub">(cm)</span></h3>
         <div class="fields" id="fields"></div>
       </div>
       <div class="card">
-        <p class="lbl">Aplicação na obra</p>
+        <h3 class="lbl">Aplicação na obra</h3>
         <p class="app" id="app"></p>
         <div class="legend">
           <span><i style="background:#b8c0c6"></i>Peça</span>
@@ -113,11 +162,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         </div>
       </div>
       <div class="card">
-        <p class="lbl">Corte da peça</p>
+        <h3 class="lbl">Corte da peça</h3>
         <svg id="sec" viewBox="0 0 320 210" width="100%" aria-label="Seção transversal com cotas"></svg>
       </div>
       <div class="card">
-        <p class="lbl">Resultado</p>
+        <h3 class="lbl">Resumo das medidas</h3>
         <dl class="res">
           <dt>Desenvolvimento (corte)</dt><dd class="big" id="rDev">–</dd>
           <dt>Área de chapa</dt><dd id="rArea">–</dd>
@@ -126,7 +175,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       </div>
     </div>
   </div>
-</div>
+</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -764,11 +813,39 @@ const APP={
 };
 for(const k in PIECES){PIECES[k].obra=OBRA[k];PIECES[k].app=APP[k]}
 
-let cur=(location.hash.slice(1) in PIECES)?location.hash.slice(1):"platibanda";
+let cur=(Object.hasOwn(PIECES,location.hash.slice(1)))?location.hash.slice(1):"platibanda";
 let mode="obra"; try{const m=localStorage.getItem("pecas3d-mode");if(m==="peca"||m==="obra")mode=m}catch(e){}
 
+// Mantém a numeração usada nos orçamentos e nos QR codes do CRM.
+const quotePieceOrder=[
+  "platibanda", "coletora", "calha-central", "calha-central-v", "calha-beiral",
+  "calha-pingadeira", "agua-furtada", "rufo-condutor", "rufo-convencional", "rufo-acabamento",
+  "rufo-testeira", "cumeeira", "rufo-chapeu", "rufo-pingadeira", "rufo-pingadeira-duplo",
+  "pingadeira", "pingadeira-marquise", "pingadeira-rufo", "pingadeira-rufo-reta", "pingadeira-rufo-inclinado",
+];
+const pieceEntries=[
+  ...quotePieceOrder.filter(key=>Object.hasOwn(PIECES,key)).map(key=>[key,PIECES[key]]),
+  ...Object.entries(PIECES).filter(([key])=>!quotePieceOrder.includes(key)),
+];
+$("tabs").innerHTML=pieceEntries.map(([key,piece],index)=>
+  `<button type="button" data-k="${key}"><span class="piece-index">${String(index+1).padStart(2,"0")}</span>${piece.nome}</button>`
+).join("");
+for(const [key,piece] of pieceEntries) $("piece-picker").add(new Option(piece.nome,key));
+$("piece-picker").addEventListener("change",event=>select(event.target.value));
+
 function renderTabs(){
-  $("tabs").innerHTML=Object.entries(PIECES).map(([k,p])=>`<button data-k="${k}" aria-pressed="${k===cur}">${p.nome}</button>`).join("");
+  const index=pieceEntries.findIndex(([key])=>key===cur);
+  const tabs=$("tabs");
+  Array.from(tabs.children).forEach((button,i)=>button.setAttribute("aria-pressed",String(i===index)));
+  const selected=tabs.children[index];
+  if(tabs.clientHeight){
+    const delta=selected.getBoundingClientRect().top-tabs.getBoundingClientRect().top;
+    if(delta<0)tabs.scrollTop+=delta;
+    else if(delta+selected.offsetHeight>tabs.clientHeight)tabs.scrollTop+=delta+selected.offsetHeight-tabs.clientHeight;
+  }
+  $("piece-picker").value=cur;
+  $("piece-index").textContent=`Peça ${String(index+1).padStart(2,"0")} / ${pieceEntries.length}`;
+  $("piece-title").textContent=PIECES[cur].nome;
 }
 function renderMode(){document.querySelectorAll("#mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===mode))}
 function renderFields(){
@@ -838,15 +915,30 @@ function build(r,v){
 let vmode="iso",moved=false;const bsize=new THREE.Vector3(1,1,1);
 function fovs(){const v=cam.fov*Math.PI/180,h=2*Math.atan(Math.tan(v/2)*cam.aspect);return [v,h]}
 function place(pos,d){cam.position.copy(pos);cam.near=Math.max(0.1,d/200);cam.far=d*20;cam.updateProjectionMatrix();ctl.target.copy(center);ctl.update()}
-function viewIso(){vmode="iso";moved=false;const [v,h]=fovs(),d=(radius||1)/Math.sin(Math.min(v,h)/2)*1.02;
+function viewIso(){setView("iso");moved=false;const [v,h]=fovs(),d=(radius||1)/Math.sin(Math.min(v,h)/2)*1.02;
   place(center.clone().addScaledVector(new THREE.Vector3(1.25,0.8,1.5).normalize(),d),d)}
-function viewFront(){vmode="front";moved=false;const [v,h]=fovs(),d=Math.max(bsize.y/2/Math.tan(v/2),bsize.x/2/Math.tan(h/2))*1.15+bsize.z/2;
+function viewFront(){setView("front");moved=false;const [v,h]=fovs(),d=Math.max(bsize.y/2/Math.tan(v/2),bsize.x/2/Math.tan(h/2))*1.15+bsize.z/2;
   place(new THREE.Vector3(center.x,center.y,center.z+d),d)}
+function setView(view){
+  vmode=view;
+  $("vIso").setAttribute("aria-pressed",String(view==="iso"));
+  $("vFront").setAttribute("aria-pressed",String(view==="front"));
+}
 function refit(){if(!moved)(vmode==="front"?viewFront:viewIso)()}
 ctl.addEventListener("start",()=>{moved=true});
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(group.children.length)refit()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(group.children.length)refit();requestDraw()}
+let drawPending=false;
+function requestDraw(){
+  if(drawPending)return;
+  drawPending=true;
+  requestAnimationFrame(()=>{
+    drawPending=false;
+    ctl.update();
+    renderer.render(scene,cam);
+  });
+}
+ctl.addEventListener("change",requestDraw);
 new ResizeObserver(resize).observe(stage);
-(function loop(){requestAnimationFrame(loop);ctl.update();renderer.render(scene,cam)})();
 
 // ---------- Seção 2D ----------
 function drawSection(r){
@@ -876,7 +968,8 @@ function update(){
   $("rArea").textContent=fmt(dev/100*v.len/100,2)+" m²";
   $("rDob").textContent=r.dob;
   drawSection(r); build(r,v);
-  if(firstView){viewIso();firstView=false}else refit()
+  if(firstView){viewIso();firstView=false}else refit();
+  requestDraw()
 }
 function select(k){
   cur=k; try{history.replaceState(null,"","#"+k)}catch(e){}
@@ -888,7 +981,7 @@ $("mode").addEventListener("click",e=>{
   mode=b.dataset.m;try{localStorage.setItem("pecas3d-mode",mode)}catch(err){}
   renderMode();firstView=true;update();
 });
-addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(k in PIECES&&k!==cur)select(k)});
+addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(Object.hasOwn(PIECES,k)&&k!==cur)select(k)});
 $("vIso").onclick=viewIso; $("vFront").onclick=viewFront;
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>last&&drawSection(last));
 if(window!==window.top){const hd=document.querySelector(".wrap > header");if(hd)hd.hidden=true}
