@@ -137,6 +137,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div class="card">
         <h3 class="lbl">Medidas <span class="sub">(cm)</span></h3>
         <div class="fields" id="fields"></div>
+        <p id="measure-error" role="alert" hidden style="color:var(--accent);font-size:13px;line-height:1.5"></p>
       </div>
       <div class="card">
         <h3 class="lbl">Aplicação na obra</h3>
@@ -162,6 +163,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
           <dt>Desenvolvimento (corte)</dt><dd class="big" id="rDev">–</dd>
           <dt>Área de chapa</dt><dd id="rArea">–</dd>
           <dt>Dobras</dt><dd id="rDob">–</dd>
+          <dt id="hole-label" hidden>Furação na chapa</dt><dd id="rHole" hidden>–</dd>
         </dl>
       </div>
     </div>
@@ -492,7 +494,37 @@ const PIECES={
       if(v.D>0){segs.push(["D",v.D,[1,0]]);pts.push([P[0],P[1]-v.D])}
       return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
     }
+  },
+  "sobrecalha":{
+    nome:"Sobrecalha",
+    comprimento:60,
+    limites:{A:{min:.1},B:{min:.1},C:{min:.1},D:{min:.1},E:{min:.1}},
+    campos:[["A","Pingadeira superior",1],["B","Aba junto à parede",3],["C","Encaixe",1.4],["D","Saia de proteção",4],["E","Gancho inferior",1.5]],
+    perfil(v){
+      const x=18,y=8+v.D,top=y+v.B;
+      const n1=Math.hypot(.47,.88),n2=Math.hypot(.82,.57);
+      const pts=[[x-.47/n1*v.A,top-.88/n1*v.A],[x,top],[x,y],[x-v.C,y],[x-v.C,y-v.D],[x-v.C+.82/n2*v.E,y-v.D-.57/n2*v.E]];
+      const segs=[["A",v.A,[-.6,-.8]],["B",v.B,[1,0]],["C",v.C,[0,-1]],["D",v.D,[-1,0]],["E",v.E,[.8,.6]]];
+      return {pts,segs,dob:4};
+    }
+  },
+  "rufo-colarinho":{
+    nome:"Rufo colarinho",
+    campos:[["A","Largura da base",40],["B","Abas laterais",3],["D","Diâmetro da chaminé",15],["ang","Inclinação do telhado (°)",25]],
+    limites:{A:{min:1},D:{min:.1},ang:{max:45}},
+    validar(v){
+      const a=v.D/2+.3,b=a/Math.cos(rad(v.ang));
+      return 2*a>=v.A-.4||2*b>=v.len-.4?"A furação precisa caber na base. Aumente a largura/comprimento ou reduza o diâmetro da chaminé.":"";
+    },
+    montar:buildColarinho,
+    perfil(v){
+      const a=v.D/2+.3,b=a/Math.cos(rad(v.ang));
+      const pts=[[-v.A/2,-v.B],[-v.A/2,0],[v.A/2,0],[v.A/2,-v.B]];
+      return {pts,segs:[["B",v.B,[-1,0]],["A",v.A,[0,-1]],["B",v.B,[1,0]]],dob:v.B>0?2:0,
+        sectionPaths:[[pts[0],pts[1],[-a,0]],[[a,0],pts[2],pts[3]]],hole:[2*a,2*b]};
+    }
   }
+
 };
 
 /* ---------- Cenário de obra (parede, estrutura, telha) ---------- */
@@ -640,6 +672,34 @@ function calhaViz(x,yt){
 }
 
 const OBRA={
+  "sobrecalha"(v){
+    const y=8+v.D+v.B;
+    strip([[0,3],[6,3],[6,0],[18,0],[18,10]],M.metal2);
+    wood(-30,5.7,-8,2.7);
+    concrete(6,18,-8,-.3);
+    roof(5.7,3.3,-1,90,0,{wood:true,us:[25,65]});
+    wall(18.3,32,-8,y+18);
+    water(6.3,17.7,.3,2.4);
+  },
+  "rufo-colarinho"(v){
+    const a=rad(v.ang),py=4.2,L=Math.max(150,v.len+40),W=Math.max(110,v.A+50);
+    const roofGroup=new THREE.Group();
+    const geo=trapGeom(W,L);geo.translate(-W/2,.18,-L/2);
+    const panel=new THREE.Mesh(geo,M.sheet);
+    panel.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,25),sheetEdge));roofGroup.add(panel);
+    const saved=ctx;ctx=roofGroup;
+    const savedZ1=Z1,savedZ2=Z2;Z1=-L/2;Z2=L/2;
+    wood(-W/2,-W/2+6,-10,-.3);wood(W/2-6,W/2,-10,-.3);
+    Z1=savedZ1;Z2=savedZ2;ctx=saved;
+    roofGroup.rotation.x=a;ctx.add(roofGroup);
+    const base=new THREE.Vector3(0,py*Math.cos(a),py*Math.sin(a));
+    const tube=new THREE.Mesh(new THREE.CylinderGeometry(v.D/2,v.D/2,43,64,1,true),M.metal2);
+    tube.position.copy(base).add(new THREE.Vector3(0,18.5,0));ctx.add(tube);
+    const cap=new THREE.Mesh(new THREE.CylinderGeometry(v.D*.7,v.D*.7,6,64),M.metal2);
+    cap.position.copy(base).add(new THREE.Vector3(0,43,0));ctx.add(cap);
+    const collar=new THREE.Mesh(new THREE.CylinderGeometry(v.D/2+.7,v.D/2+.7,7,64,1,true),mat);
+    collar.position.copy(base).add(new THREE.Vector3(0,2,0));ctx.add(collar);
+  },
   "platibanda"(v){
     const H=v.A;
     wall(-15,-0.3,-55,H+35);
@@ -781,6 +841,8 @@ const OBRA={
 OBRA["rufo-condutor"]=OBRA["platibanda"];
 
 const APP={
+  "sobrecalha":"Protege o encontro da calha platibanda com a parede. O encaixe cobre a borda da calha e a saia conduz a água para dentro, com gancho inferior.",
+  "rufo-colarinho":"Arremate da passagem de uma chaminé vertical pelo telhado inclinado. A base tem abas laterais e furação elíptica ajustada à inclinação, com folga de 3 mm por lado. A área informada é a chapa bruta, antes da furação.",
   "platibanda":"Encostada na platibanda, sobre a viga. A telha despeja dentro da calha por cima do lado da frente.",
   "agua-furtada":"No encontro de duas águas do telhado (rincão), apoiada nas tábuas; as telhas avançam sobre as abas e despejam no centro.",
   "coletora":"Fixada na testeira do beiral com suportes a cada 60 cm; a telha avança sobre a calha e despeja dentro dela.",
@@ -842,9 +904,10 @@ function renderMode(){document.querySelectorAll("#mode button").forEach(b=>b.set
 function renderFields(){
   const p=PIECES[cur];
   $("fields").innerHTML=p.campos.map(([k,l,d])=>{
+    const lim=p.limites?.[k]||{};
     const tag=k.length===1?`<span class="tag">${k}</span>`:"";
-    return `<div class="f"><label for="f-${cur}-${k}">${tag}${l}</label><input id="f-${cur}-${k}" data-k="${k}" type="number" step="0.5" min="0" value="${d}"></div>`;
-  }).join("")+`<div class="f"><label for="f-${cur}-len">Comprimento</label><input id="f-${cur}-len" data-k="len" type="number" step="10" min="10" value="100"></div>`;
+    return `<div class="f"><label for="f-${cur}-${k}">${tag}${l}</label><input id="f-${cur}-${k}" data-k="${k}" type="number" step="${p.limites ? 0.1 : 0.5}" min="${lim.min??0}"${lim.max!==undefined?` max="${lim.max}"`:""} value="${d}"></div>`;
+  }).join("")+`<div class="f"><label for="f-${cur}-len">Comprimento</label><input id="f-${cur}-len" data-k="len" type="number" step="10" min="10" value="${p.comprimento||100}"></div>`;
   $("fields").querySelectorAll("input").forEach(i=>i.addEventListener("input",update));
   $("app").textContent=p.app||"";
 }
@@ -875,11 +938,24 @@ const edgeMat=new THREE.LineBasicMaterial({color:0x34404a});
 let group=new THREE.Group(); scene.add(group);
 let center=new THREE.Vector3(), radius=50;
 
+function buildColarinho(v,r){
+  const g=new THREE.Group(),t=.2,sh=new THREE.Shape();
+  sh.moveTo(-v.A/2,-v.len/2);sh.lineTo(v.A/2,-v.len/2);sh.lineTo(v.A/2,v.len/2);sh.lineTo(-v.A/2,v.len/2);sh.closePath();
+  const hole=new THREE.Path();hole.absellipse(0,0,r.hole[0]/2,r.hole[1]/2,0,Math.PI*2,false,0);sh.holes.push(hole);
+  const geo=new THREE.ExtrudeGeometry(sh,{depth:t,bevelEnabled:false,curveSegments:64});geo.rotateX(-Math.PI/2);geo.translate(0,-t,0);
+  const add=geometry=>{const mesh=new THREE.Mesh(geometry,mat);mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry,25),edgeMat));g.add(mesh);return mesh};
+  add(geo);
+  if(v.B>0)for(const k of [-1,1]){const m=add(new THREE.BoxGeometry(t,v.B,v.len));m.position.set(k*(v.A/2-t/2),-v.B/2,0)}
+  if(mode==="obra"){const a=rad(v.ang);g.rotation.x=a;g.position.set(0,4.2*Math.cos(a),4.2*Math.sin(a))}
+  return g;
+}
+
 function build(r,v){
   const pts=r.pts,L=v.len,t=0.2;
   scene.remove(group); group.traverse(o=>{o.geometry&&o.geometry.dispose()});
   group=new THREE.Group();
-  for(let i=0;i<pts.length-1;i++){
+  if(PIECES[cur].montar)group.add(PIECES[cur].montar(v,r));
+  else for(let i=0;i<pts.length-1;i++){
     const [x1,y1]=pts[i],[x2,y2]=pts[i+1];
     const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy); if(l<0.01)continue;
     const g=new THREE.BoxGeometry(l+t,t,L);
@@ -940,7 +1016,7 @@ function drawSection(r){
   const ox=(W-(maxX-minX)*s)/2-minX*s, oy=(H+(maxY-minY)*s)/2+minY*s;
   const P=([x,y])=>[ox+x*s,oy-y*s];
   const fg=css("--fg"),dim=css("--dim"),mu=css("--muted");
-  let h=`<polyline points="${pts.map(p=>P(p).join(",")).join(" ")}" fill="none" stroke="${fg}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  let h=(r.sectionPaths||[pts]).map(path=>`<polyline points="${path.map(p=>P(p).join(",")).join(" ")}" fill="none" stroke="${fg}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`).join("");
   for(let i=0;i<pts.length-1;i++){
     const [k,val,n]=segs[i]; if(!k)continue;
     const [a,b]=[P(pts[i]),P(pts[i+1])],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
@@ -953,7 +1029,14 @@ function drawSection(r){
 
 let last=null, firstView=true;
 function update(){
-  const v=vals(), r=PIECES[cur].perfil(v); last=r;
+  const v=vals(),p=PIECES[cur];
+  const bad=p.limites&&Array.from($("fields").querySelectorAll("input")).some(input=>!input.checkValidity());
+  const error=bad?"Revise as medidas e os limites indicados nos campos.":p.validar?.(v)||"";
+  $("measure-error").hidden=!error;$("measure-error").textContent=error;
+  if(error)return;
+  const r=p.perfil(v);last=r;
+  $("hole-label").hidden=$("rHole").hidden=!r.hole;
+  $("rHole").textContent=r.hole?r.hole.map(n=>fmt(n)).join(" × ")+" cm":"";
   const dev=r.segs.reduce((a,s)=>a+s[1],0);
   $("rDev").textContent=fmt(dev)+" cm";
   $("rArea").textContent=fmt(dev/100*v.len/100,2)+" m²";
