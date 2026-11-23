@@ -523,6 +523,23 @@ const PIECES={
       return {pts,segs:[["B",v.B,[-1,0]],["A",v.A,[0,-1]],["B",v.B,[1,0]]],dob:v.B>0?2:0,
         sectionPaths:[[pts[0],pts[1],[-a,0]],[[a,0],pts[2],pts[3]]],hole:[2*a,2*b]};
     }
+  },
+  "calha-platibanda-pingadeira":{
+    nome:"Calha platibanda com pingadeira",
+    campos:[["A","Pingadeira",3],["F","Bainha",1],["B","Topo",15],["C","Lado parede",20],["D","Fundo",15],["E","Lado frente",12],["G","Aba",2]],
+    perfil(v){
+      // Frente em x=0, muro à direita: aba → frente → fundo → lado parede → topo sobre o muro → pingadeira para fora → bainha.
+      const s=Math.sin(rad(20)),c=Math.cos(rad(20)),pts=[],segs=[];
+      if(v.G>0){pts.push([-v.G,v.E]);segs.push(["G",v.G,[0,-1]])}
+      pts.push([0,v.E]);segs.push(["E",v.E,[-1,0]]);
+      pts.push([0,0]);segs.push(["D",v.D,[0,-1]]);
+      pts.push([v.D,0]);segs.push(["C",v.C,[-1,0]]);
+      pts.push([v.D,v.C]);segs.push(["B",v.B,[0,-1]]);
+      const P=[v.D+v.B,v.C];pts.push(P);
+      if(v.A>0){const Q=[P[0]+v.A*s,P[1]-v.A*c];segs.push(["A",v.A,[1,0]]);pts.push(Q);
+        if(v.F>0){segs.push(["F",v.F,[-.7,.7]]);pts.push([Q[0]-v.F*.8,Q[1]+v.F*.6])}}
+      return {pts,segs,dob:segs.filter(s=>s[1]>0).length-1};
+    }
   }
 
 };
@@ -672,6 +689,12 @@ function calhaViz(x,yt){
 }
 
 const OBRA={
+  "calha-platibanda-pingadeira"(v){
+    wall(v.D+0.3,v.D+v.B-0.3,-60,v.C-0.3);
+    concrete(-14,v.D+0.3,-16,-0.3);
+    water(0.3,v.D-0.3,0.3,Math.max(0.6,Math.min(3,v.E*.4)));
+    roof(Math.min(v.D*.4,8),v.E+1.2,-1,90,8,{us:[30,80]});
+  },
   "sobrecalha"(v){
     const y=8+v.D+v.B;
     strip([[0,3],[6,3],[6,0],[18,0],[18,10]],M.metal2);
@@ -841,6 +864,7 @@ const OBRA={
 OBRA["rufo-condutor"]=OBRA["platibanda"];
 
 const APP={
+  "calha-platibanda-pingadeira":"Calha encostada na platibanda com o topo cobrindo o muro e a pingadeira descendo pelo lado de fora, com bainha. A telha despeja dentro da calha por cima do lado da frente.",
   "sobrecalha":"Protege o encontro da calha platibanda com a parede. O encaixe cobre a borda da calha e a saia conduz a água para dentro, com gancho inferior.",
   "rufo-colarinho":"Arremate da passagem de uma chaminé vertical pelo telhado inclinado. A base tem abas laterais e furação elíptica ajustada à inclinação, com folga de 3 mm por lado. A área informada é a chapa bruta, antes da furação.",
   "platibanda":"Encostada na platibanda, sobre a viga. A telha despeja dentro da calha por cima do lado da frente.",
